@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "test": "jest --coverage --noStackTrace --silent"
+    "test": "jest --coverage --noStackTrace --silent",
+    "currentTest": "jest src/__tests__/Login.js"
   },
   "jest": {
     "verbose": false,
@@ -14,7 +15,8 @@
       "!**/external/**",
       "!**/fixtures/**",
       "!**/lcov-report/**"
-    ]
+    ],
+    "setupFilesAfterEnv": ["./src/__mocks__/localStorage.js"]
   },
   "type": "module",
   "dependencies": {
