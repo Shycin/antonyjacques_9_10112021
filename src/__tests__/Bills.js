@@ -17,5 +17,14 @@ describe("Given I am connected as an employee", () => {
         const datesSorted = [...dates].sort(antiChrono)
         expect(dates).toEqual(datesSorted)
     })
+
+    test("Then bills is attempt to load page", () => {
+      const html = BillsUI({ data: [], loading: true })
+      document.body.innerHTML = html
+    })
+    test("Then bills generate error on load", () => {
+      const html = BillsUI({ data: [], loading: false, error: true })
+      document.body.innerHTML = html
+    })
   })
 })
