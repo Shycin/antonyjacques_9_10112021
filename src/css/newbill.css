@@ -1,3 +1,16 @@
+.form-newbill-container div[data-error]::after {
+  content: attr(data-error);
+  font-size: 0.8em;
+  color: #e54858;
+  display: block;
+  margin-top: 7px;
+  margin-bottom: 7px;
+  text-align: right;
+  transition: 0.3s;
+  line-height: 1.5;
+}
+
+
 .form-newbill-container {
   width: 100%;
 }
