@@ -1,6 +1,8 @@
-import { screen } from "@testing-library/dom"
 import BillsUI from "../views/BillsUI.js"
+import Bills from '../containers/Bills.js'
 import { bills } from "../fixtures/bills.js"
+import { ROUTES } from "../constants/routes"
+import { fireEvent, screen } from "@testing-library/dom"
 
 describe("Given I am connected as an employee", () => {
   describe("When I am on Bills Page", () => {
@@ -25,6 +27,76 @@ describe("Given I am connected as an employee", () => {
     test("Then bills generate error on load", () => {
       const html = BillsUI({ data: [], loading: false, error: true })
       document.body.innerHTML = html
+    })
+
+
+    test("Then click on new Bills", () => {
+      document.body.innerHTML = BillsUI({ data: [] })
+      const btnNewBill = screen.getByTestId("btn-new-bill")
+
+      // localStorage should be populated with form data
+      Object.defineProperty(window, "localStorage", {
+        value: {
+          getItem: jest.fn(() => null),
+          setItem: jest.fn(() => null)
+        },
+        writable: true
+      })
+
+      // we have to mock navigation to test it
+      const onNavigate = (pathname) => {
+        document.body.innerHTML = ROUTES({ pathname })
+      }
+
+      const firebase = jest.fn()
+
+      const bills = new Bills({
+        document,
+        onNavigate,
+        firebase,
+        localStorage: window.localStorage
+      })
+
+      const handleClick = jest.fn(bills.handleClickNewBill)    
+      btnNewBill.addEventListener("click", handleClick)
+      fireEvent.click(btnNewBill)
+        expect(handleClick).toHaveBeenCalled()
+    })
+
+    test("Then click on icon eye to show image", () => {
+      
+      const html = BillsUI({ data: bills })
+      document.body.innerHTML = html
+
+      const iconEye = screen.getAllByTestId("icon-eye")[0]
+
+       // localStorage should be populated with form data
+       Object.defineProperty(window, "localStorage", {
+        value: {
+          getItem: jest.fn(() => null),
+          setItem: jest.fn(() => null)
+        },
+        writable: true
+      })
+
+      // we have to mock navigation to test it
+      const onNavigate = (pathname) => {
+        document.body.innerHTML = ROUTES({ pathname })
+      }
+
+      const firebase = jest.fn()
+
+      const billsPage = new Bills({
+        document,
+        onNavigate,
+        firebase,
+        localStorage: window.localStorage
+      })
+
+      const handleClick = jest.fn(billsPage.handleClickIconEye(iconEye))    
+      iconEye.addEventListener("click", handleClick)
+      fireEvent.click(iconEye)
+        expect(handleClick).toHaveBeenCalled()
     })
   })
 })
