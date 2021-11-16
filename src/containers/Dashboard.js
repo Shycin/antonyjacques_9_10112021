@@ -91,7 +91,9 @@ export default class {
     if (this.counter % 2 === 0) {
       bills.forEach(b => {
         $(`#open-bill${b.id}`).css({ background: '#0D5AE5' })
+        $(`#open-bill${b.id}`).removeClass('currentSelect')
       })
+      $(`#open-bill${bill.id}`).addClass('currentSelect')
       $(`#open-bill${bill.id}`).css({ background: '#2A2B35' })
       $('.dashboard-right-container div').html(DashboardFormUI(bill))
       $('.vertical-navbar').css({ height: '150vh' })
@@ -142,11 +144,20 @@ export default class {
       $(`#arrow-icon${this.index}`).css({ transform: 'rotate(90deg)'})
       $(`#status-bills-container${this.index}`)
         .html("")
+
+      if($('.currentSelect').length === 0)
+      {
+        $('.dashboard-right-container div').html(`
+          <div id="big-billed-icon"> ${BigBilledIcon} </div>
+        `)
+        this.id = ""
+      }
+
       this.counter ++
     }
 
     bills.forEach(bill => {
-      $(`#open-bill${bill.id}`).click((e) => this.handleEditTicket(e, bill, bills))
+      $(`#status-bills-container${index} #open-bill${bill.id}`).click((e) => this.handleEditTicket(e, bill, bills))
     })
 
     return bills
