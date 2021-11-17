@@ -93,10 +93,16 @@ describe("Given I am connected as an employee", () => {
         localStorage: window.localStorage
       })
 
+      const somethingSpy = jest.spyOn(billsPage, 'modal');
+      myObj.doSomething();
+      expect(somethingSpy).toHaveBeenCalled();
+
       const handleClick = jest.fn(billsPage.handleClickIconEye(iconEye))    
       iconEye.addEventListener("click", handleClick)
       fireEvent.click(iconEye)
         expect(handleClick).toHaveBeenCalled()
+
+        
     })
   })
 })
