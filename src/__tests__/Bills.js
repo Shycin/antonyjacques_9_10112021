@@ -2,14 +2,33 @@ import BillsUI from "../views/BillsUI.js"
 import Bills from '../containers/Bills.js'
 import { bills } from "../fixtures/bills.js"
 import { ROUTES } from "../constants/routes"
+import ROUTER from "../app/Router"
 import { fireEvent, screen } from "@testing-library/dom"
+import { localStorageMock } from "../__mocks__/localStorage.js"
+import { ROUTES_PATH } from '../constants/routes.js'
+import firestore from "../app/Firestore"
 
 describe("Given I am connected as an employee", () => {
   describe("When I am on Bills Page", () => {
     test("Then bill icon in vertical layout should be highlighted", () => {
-      const html = BillsUI({ data: []})
-      document.body.innerHTML = html
-      //to-do write expect expression
+
+      firestore.bills = () => ({bills, get: jest.fn().mockResolvedValue()})
+
+      Object.defineProperty(window, 'localStorage', { value: localStorageMock })
+      const user = JSON.stringify({
+        type: 'Employee'
+      })
+      window.localStorage.setItem('user', user)
+
+      // définir la page dans le localstorage
+      Object.defineProperty(window, 'location', { value: { hash: ROUTES_PATH['Bills'] } })
+
+      document.body.innerHTML = `<div id="root"></div>`
+
+      ROUTER()
+
+      const icon = screen.getByTestId("icon-window")
+      expect(icon.classList.contains('active-icon')).toEqual(true)
     })
     test("Then bills should be ordered from earliest to latest", () => {
       const html = BillsUI({ data: bills })
@@ -23,10 +42,16 @@ describe("Given I am connected as an employee", () => {
     test("Then bills is attempt to load page", () => {
       const html = BillsUI({ data: [], loading: true })
       document.body.innerHTML = html
+
+      const loadingElt = document.getElementById('loading')
+      expect(loadingElt).not.toEqual(null)
     })
     test("Then bills generate error on load", () => {
       const html = BillsUI({ data: [], loading: false, error: true })
       document.body.innerHTML = html
+
+      const message = screen.getByText(/Erreur/)
+      expect(message).toBeTruthy()
     })
 
 
@@ -64,11 +89,10 @@ describe("Given I am connected as an employee", () => {
     })
 
     test("Then click on icon eye to show image", () => {
-      
+      let modalIsOpen = false
+
       const html = BillsUI({ data: bills })
       document.body.innerHTML = html
-
-      const iconEye = screen.getAllByTestId("icon-eye")[0]
 
        // localStorage should be populated with form data
        Object.defineProperty(window, "localStorage", {
@@ -85,7 +109,6 @@ describe("Given I am connected as an employee", () => {
       }
 
       const firebase = jest.fn()
-
       const billsPage = new Bills({
         document,
         onNavigate,
@@ -93,14 +116,18 @@ describe("Given I am connected as an employee", () => {
         localStorage: window.localStorage
       })
 
-      const somethingSpy = jest.spyOn(billsPage, 'modal');
-      myObj.doSomething();
-      expect(somethingSpy).toHaveBeenCalled();
+      window.$.fn.modal = jest.fn(()=>modalIsOpen=true)
+      const handleClickIconEye = jest.fn((e) => {
+        billsPage.handleClickIconEye(e.target)
+      })
 
-      const handleClick = jest.fn(billsPage.handleClickIconEye(iconEye))    
-      iconEye.addEventListener("click", handleClick)
-      fireEvent.click(iconEye)
-        expect(handleClick).toHaveBeenCalled()
+      const buttonsIconEye = document.querySelectorAll(`div[data-testid="icon-eye"]`)
+      buttonsIconEye.forEach(icon => {
+        icon.addEventListener('click', handleClickIconEye)
+        fireEvent.click(icon)
+      })
+        expect(handleClickIconEye).toHaveBeenCalled()
+        expect(modalIsOpen).toEqual(true)
 
         
     })
