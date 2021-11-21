@@ -15,13 +15,17 @@ export default class NewBill {
     this.fileName = null
     new Logout({ document, localStorage, onNavigate })
   }
+  isFileImage(file) {
+      const acceptedImageTypes = ['image/jpg', 'image/jpeg', 'image/png'];
+  
+      return file && acceptedImageTypes.includes(file['type'])
+  }
   handleChangeFile = e => {
     const file = this.document.querySelector(`input[data-testid="file"]`).files[0]
     const filePath = e.target.value.split(/\\/g)
     const fileName = filePath[filePath.length-1]
 
-    const regex_ext = /\.(jpg)|(jpeg)|(png)/g;
-    if(fileName.match(regex_ext))
+    if(this.isFileImage(file))
     {
       this.firestore
       .storage
@@ -32,6 +36,8 @@ export default class NewBill {
         this.fileUrl = url
         this.fileName = fileName
       })
+
+      e.target.parentNode.setAttribute("data-error-visible","false")
     }
     else
     {
@@ -43,7 +49,7 @@ export default class NewBill {
   }
   handleSubmit = e => {
     e.preventDefault()
-    console.log('e.target.querySelector(`input[data-testid="datepicker"]`).value', e.target.querySelector(`input[data-testid="datepicker"]`).value)
+    // console.log('e.target.querySelector(`input[data-testid="datepicker"]`).value', e.target.querySelector(`input[data-testid="datepicker"]`).value)
     const email = JSON.parse(localStorage.getItem("user")).email
     const bill = {
       email,

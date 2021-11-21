@@ -7,9 +7,18 @@ import { fireEvent, screen } from "@testing-library/dom"
 import { localStorageMock } from "../__mocks__/localStorage.js"
 import { ROUTES_PATH } from '../constants/routes.js'
 import firestore from "../app/Firestore"
+import firebase from "../__mocks__/firebase"
 
 describe("Given I am connected as an employee", () => {
   describe("When I am on Bills Page", () => {
+
+    test("Then generate data from API", async () => {
+      const getSpy = jest.spyOn(firebase, "get")
+      const bills = await firebase.get()
+      expect(getSpy).toHaveBeenCalledTimes(1)
+      expect(bills.data.length).toBe(4)
+    })
+   
     test("Then bill icon in vertical layout should be highlighted", () => {
 
       firestore.bills = () => ({bills, get: jest.fn().mockResolvedValue()})
@@ -46,11 +55,22 @@ describe("Given I am connected as an employee", () => {
       const loadingElt = document.getElementById('loading')
       expect(loadingElt).not.toEqual(null)
     })
-    test("Then bills generate error on load", () => {
-      const html = BillsUI({ data: [], loading: false, error: true })
+    test("Then bills generate error 404 on load", async () => {
+      firebase.get.mockImplementationOnce(() =>
+        Promise.reject(new Error("Erreur 404"))
+      )
+      const html = BillsUI({ error: "Erreur 404" })
       document.body.innerHTML = html
-
-      const message = screen.getByText(/Erreur/)
+      const message = await screen.getByText(/Erreur 404/)
+      expect(message).toBeTruthy()
+    })
+    test("Then bills generate error 500 on load", async () => {
+      firebase.get.mockImplementationOnce(() =>
+        Promise.reject(new Error("Erreur 500"))
+      )
+      const html = BillsUI({ error: "Erreur 500" })
+      document.body.innerHTML = html
+      const message = await screen.getByText(/Erreur 500/)
       expect(message).toBeTruthy()
     })
 
