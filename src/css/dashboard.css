@@ -117,3 +117,8 @@
   cursor: pointer;
 }
 
+
+#modaleFileAdmin1 .modal-dialog .modal-body img
+{
+  max-width: 100%;
+}
